@@ -4,44 +4,54 @@ const port = 3000
 var bodyParser= require('body-parser')
 app.use(bodyParser.json())
 
- module.exports = app;
+let todos = [];
 
-
-var todoArr=[{title: "nodejs",description: "complete week 2 assignment"},
-               {title: " ",description:" "} 
-              ];
-app.get('/', (req,res)=>{
-  res.send("Todo is running!")
-})
 app.get('/todos', (req, res) => {
-  res.status(200).send(JSON.stringify(todoArr));
-})
+  res.json(todos);
+});
+
 app.get('/todos/:id', (req, res) => {
-   var todoId=req.params.id;
-   res.send(JSON.stringify(todoArr[id])); 
-})
+  const todo = todos.find(t => t.id === parseInt(req.params.id));
+  if (!todo) res.status(404).send();
+  else res.json(todo);
+});
+
 app.post('/todos', (req, res) => {
-  todoArr.push(req.body);
-  res.status(201).send(JSON.stringify(todoArr));
-})
+  const newTodo = {
+    id: Math.floor(Math.random() * 1000000), // unique random id
+    title: req.body.title,
+    description: req.body.description
+  };
+  todos.push(newTodo);
+  res.status(201).json(newTodo);
+});
+
 app.put('/todos/:id', (req, res) => {
-  const todoId = req.params.id;
-  const updatedTodo= req.body;
-  if(todoArr[todoId]!==undefined){
-    todoArr[todoId] = { ...todoArr[todoId], ...updatedTodo };
-    res.status(200).json({ message: 'Todo updated successfully' });
-  } else {
-    res.status(404).json({ error: 'Todo not found' });
+  const todoIndex = todos.findIndex(t => t.id === parseInt(req.params.id));
+  if (todoIndex === -1) res.status(404).send();
+  else {
+    todos[todoIndex].title = req.body.title;
+    todos[todoIndex].description = req.body.description;
+    res.json(todos[todoIndex]);
   }
-})
+});
+
 app.delete('/todos/:id', (req, res) => {
-  var todoId= req.params.id;
-  todoArr.splice(todoId,1);
-  res.status(200).send(JSON.stringify(todoArr));
-})
-app.get('/:other', (req, res) => {
-  res.status(404).json({ error: 'Route not found!' });
-})
+  const todoIndex = todos.findIndex(t => t.id === parseInt(req.params.id));
+  if (todoIndex === -1) res.status(404).send();
+  else {
+    todos.splice(todoIndex, 1);
+    res.status(200).send();
+  }
+});
+
+// for all other routes, return 404
+app.use((req, res, next) => {
+  res.status(404).send();
+});
+
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
 })
+
+module.exports = app;
