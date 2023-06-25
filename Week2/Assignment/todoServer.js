@@ -5,33 +5,14 @@ var bodyParser= require('body-parser')
 app.use(bodyParser.json())
 
 let todos = [];
-
-function findIndex(arr, id) {
-  for (let i = 0; i < arr.length; i++) {
-    if (arr[i].id === id) return i;
-  }
-  return -1;
-}
-
-function removeAtIndex(arr, index) {
-  let newArray = [];
-  for (let i = 0; i < arr.length; i++) {
-    if (i !== index) newArray.push(arr[i]);
-  }
-  return newArray;
-}
-
 app.get('/todos', (req, res) => {
   res.json(todos);
 });
 
 app.get('/todos/:id', (req, res) => {
-  const todoIndex = findIndex(todos, parseInt(req.params.id));
-  if (todoIndex === -1) {
-    res.status(404).send();
-  } else {
-    res.json(todos[todoIndex]);
-  }
+  const todo = todos.find(t => t.id === parseInt(req.params.id));
+  if (!todo) res.status(404).send();
+  else res.json(todo);
 });
 
 app.post('/todos', (req, res) => {
@@ -45,10 +26,9 @@ app.post('/todos', (req, res) => {
 });
 
 app.put('/todos/:id', (req, res) => {
-  const todoIndex = findIndex(todos, parseInt(req.params.id));
-  if (todoIndex === -1) {
-    res.status(404).send();
-  } else {
+  const todoIndex = todos.findIndex(t => t.id === parseInt(req.params.id));
+  if (todoIndex === -1) res.status(404).send();
+  else {
     todos[todoIndex].title = req.body.title;
     todos[todoIndex].description = req.body.description;
     res.json(todos[todoIndex]);
@@ -56,11 +36,10 @@ app.put('/todos/:id', (req, res) => {
 });
 
 app.delete('/todos/:id', (req, res) => {
-  const todoIndex = findIndex(todos, parseInt(req.params.id));
-  if (todoIndex === -1) {
-    res.status(404).send();
-  } else {
-    todos = removeAtIndex(todos, todoIndex);
+  const todoIndex = todos.findIndex(t => t.id === parseInt(req.params.id));
+  if (todoIndex === -1) res.status(404).send();
+  else {
+    todos.splice(todoIndex, 1);
     res.status(200).send();
   }
 });
