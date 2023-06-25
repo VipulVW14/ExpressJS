@@ -10,36 +10,73 @@ app.get('/', (req, res) => {
 
 let users=[];
 
-app.post('/signup', (req,res)=>{
-  const { username, password, firstname, lastname } =req.body;
-
-  const existingUser= users.find((user)=> user.username === username && user.password === password);
-  if(existingUser) res.status(400).json({message: 'User already exists! Please Login'});
-  else{
-  const uniqueId= uuidv4();
-  const newUser={ id: uniqueId,username,password,firstname,lastname};
-  users.push(newUser);
-  res.status(201).json({users});
+app.use(express.json());
+app.post("/signup", (req, res) => {
+  var user = req.body;
+  let userAlreadyExists = false;
+  for (var i = 0; i<users.length; i++) {
+    if (users[i].email === user.email) {
+        userAlreadyExists = true;
+        break;
+    }
   }
-})
-
-app.post('/login', (req,res)=>{
-  const {username,password}= req.body;
-  const user= users.find((user)=>user.username === username && user.password === password);
-  if(!user) res.status(401).json("User doesn't exist! Please Sign Up Dawg.");
-  res.status(200).json(user);
-})
-
-app.get('/data', (req,res)=>{
-  const userDetails= users.map((user)=>{
-    return {
-      id: user.id,
-      firstname: user.firstname,
-      lastname: user.lastname
-    };
-  });
-  res.json({users: userDetails})
+  if (userAlreadyExists) {
+    res.sendStatus(400);
+  } else {
+    users.push(user);
+    res.status(201).send("Signup successful");
+  }
 });
+
+app.post("/login", (req, res) => {
+  var user = req.body;
+  let userFound = null;
+  for (var i = 0; i<users.length; i++) {
+    if (users[i].email === user.email && users[i].password === user.password) {
+        userFound = users[i];
+        break;
+    }
+  }
+
+  if (userFound) {
+    res.json({
+        firstName: userFound.firstName,
+        lastName: userFound.lastName,
+        email: userFound.email
+    });
+  } else {
+    res.sendStatus(401);
+  }
+});
+
+app.get("/data", (req, res) => {
+  var email = req.headers.email;
+  var password = req.headers.password;
+  let userFound = false;
+  for (var i = 0; i<users.length; i++) {
+    if (users[i].email === email && users[i].password === password) {
+        userFound = true;
+        break;
+    }
+  }
+
+  if (userFound) {
+    let usersToReturn = [];
+    for (let i = 0; i<users.length; i++) {
+        usersToReturn.push({
+            firstName: users[i].firstName,
+            lastName: users[i].lastName,
+            email: users[i].email
+        });
+    }
+    res.json({
+        users
+    });
+  } else {
+    res.sendStatus(401);
+  }
+});
+
 
 app.all('*', (req, res) => {
   res.status(404).send('Route not found');
