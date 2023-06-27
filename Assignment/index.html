@@ -1,0 +1,41 @@
+ <!DOCTYPE html>
+ <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo</title>
+ </head>
+ <script>
+    function parsedResponse(data){
+      console.log(data);
+    }
+    function callbackFn(res){
+      resp.json().then(parsedResponse);
+    }
+    function x(){
+    //send a get request, get all the todo and print it in the html(dom)
+    };
+    x();
+    function onPress(){
+       fetch( "http://localhost:3000/todos",{
+         method: "POST",
+         body: JSON.stringify({
+            title: "gym",
+            description: "leave library at 7"
+         }),
+         headers: {
+            "Content-Type": "application/json"
+         }
+       } ).then(callbackFn); 
+    }
+
+ </script>
+ <body>
+    Todo Title
+    <input type="text" name="" id="title">
+    <br>
+    Todo Description
+    <input type="text" id="description">
+    <br>
+    <button onclick="onPress()">Send todo</button>
+ </body>
+ </html>
